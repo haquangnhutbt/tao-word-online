@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tạo file Word offline</title>
+
+  <!-- 3 thư viện cần dùng -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.36.0/docxtemplater.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body style="font-family: Arial; margin: 40px;">
+  <h2>Tạo file Word offline</h2>
+
+  <label>Họ và tên: <input id="name"></label><br><br>
+  <label>Địa chỉ: <input id="address"></label><br><br>
+  <label>Nghề nghiệp: <input id="job"></label><br><br>
+
+  <button onclick="generate()">Tạo file Word</button>
+
+  <script>
+  async function generate() {
+    try {
+      const response = await fetch('template.docx');
+      const arrayBuffer = await response.arrayBuffer();
+
+      const zip = new PizZip(arrayBuffer);
+      const doc = new window.docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+      });
+
+      const data = {
+        name: document.getElementById('name').value,
+        address: document.getElementById('address').value,
+        job: document.getElementById('job').value,
+        date: new Date().toLocaleDateString('vi-VN')
+      };
+
+      doc.render(data);
+
+      const out = doc.getZip().generate({
+        type: "blob",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+
+      saveAs(out, "Ket_qua.docx");
+    } catch (error) {
+      alert("❌ Lỗi: " + error.message);
+    }
+  }
+  </script>
+</body>
+</html>
