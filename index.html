@@ -2,54 +2,58 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tạo file Word offline</title>
-
-  <!-- 3 thư viện cần dùng -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.36.0/docxtemplater.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    body { font-family: Arial; background: #ddd; padding: 20px; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input { width: 100%; padding: 5px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+  </style>
 </head>
-<body style="font-family: Arial; margin: 40px;">
-  <h2>Tạo file Word offline</h2>
+<body>
+  <h1>Tạo file Word offline</h1>
 
-  <label>Họ và tên: <input id="name"></label><br><br>
-  <label>Địa chỉ: <input id="address"></label><br><br>
-  <label>Nghề nghiệp: <input id="job"></label><br><br>
+  <label>Họ và tên:</label>
+  <input id="hoten" placeholder="Nhập họ tên">
 
-  <button onclick="generate()">Tạo file Word</button>
+  <label>Địa chỉ:</label>
+  <input id="diachi" placeholder="Nhập địa chỉ">
+
+  <label>Nội dung:</label>
+  <input id="noidung" placeholder="Nhập nội dung">
+
+  <button onclick="taoWord()">Tạo file Word</button>
+
+  <!-- Các thư viện cần thiết -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.7/pizzip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.8/docxtemplater.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <script>
-  async function generate() {
-    try {
-      const response = await fetch('template.docx');
-      const arrayBuffer = await response.arrayBuffer();
+    async function taoWord() {
+      try {
+        const response = await fetch('template.docx');
+        const arrayBuffer = await response.arrayBuffer();
 
-      const zip = new PizZip(arrayBuffer);
-      const doc = new window.docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-      });
+        const zip = new PizZip(arrayBuffer);
+        const doc = new window.docxtemplater().loadZip(zip);
 
-      const data = {
-        name: document.getElementById('name').value,
-        address: document.getElementById('address').value,
-        job: document.getElementById('job').value,
-        date: new Date().toLocaleDateString('vi-VN')
-      };
+        doc.setData({
+          hoten: document.getElementById('hoten').value,
+          diachi: document.getElementById('diachi').value,
+          noidung: document.getElementById('noidung').value
+        });
 
-      doc.render(data);
+        doc.render();
 
-      const out = doc.getZip().generate({
-        type: "blob",
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
-
-      saveAs(out, "Ket_qua.docx");
-    } catch (error) {
-      alert("❌ Lỗi: " + error.message);
+        const out = doc.getZip().generate({ type: "blob" });
+        saveAs(out, "Ketqua.docx");
+      } catch (error) {
+        alert("Lỗi: " + error);
+      }
     }
-  }
   </script>
 </body>
 </html>
